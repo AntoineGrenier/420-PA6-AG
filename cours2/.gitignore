@@ -47,6 +47,7 @@ CodeCoverage/
 *.bin
 *.db
 *.json
+*.suo
 
 CopilotIndices/
 DesignTimeBuild/
