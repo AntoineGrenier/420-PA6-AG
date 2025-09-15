@@ -1,4 +1,9 @@
 ﻿using System;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Runtime.ConstrainedExecution;
+using System.Threading.Channels;
+using System.Net;
+using System.Reflection.Metadata;
 
 /// <summary>
 /// Programme principal qui permet à l'utilisateur de choisir un animal
@@ -54,17 +59,38 @@ class Program
         Console.WriteLine(animal.Deplacer());
         Console.WriteLine(animal.FaireBruit());
 
+        //Exercice 1 – Tableaux et opérations
+        //Objectif : Déclarer et manipuler un tableau.
+        //Énoncé :
+        //Créer un tableau int[] contenant 5 nombres prédéfinis;
+        //Afficher la somme des éléments avec Sum()(LINQ);
+        //Afficher le nombre d’éléments avec Length;
+        //(Pas de boucle : utiliser directement les méthodes intégrées).
         Console.WriteLine("|*************************Exercice #1*************************|");
         int[] tab = [1, 2, 3, 4, 5];
         Console.WriteLine($"Somme : {tab.Sum()}");
         Console.WriteLine($"Len : {tab.Length}");
 
+        //Exercice 2 – Collections(List<T>)
+        //Objectif: Utiliser une liste dynamique et ses méthodes.
+        //Énoncé :
+        //Créer une List<string> avec 3 prénoms;
+        //Ajouter un prénom avec Add();
+        //Supprimer un prénom avec Remove();
+        //Afficher le nombre total avec Count.
         Console.WriteLine("|*************************Exercice #2*************************|");
         var listePrenoms = new List<string>() { "Jean", "Pierre", "Jacques" };
         listePrenoms.Add("Michel");
         listePrenoms.Remove("Jacques");
         Console.WriteLine($"Count : {listePrenoms.Count}");
 
+        //Exercice 3 – Chaînes et opérations
+        //Objectif : Manipuler des string avec les méthodes intégrées.
+        //Énoncé :
+        //Déclarer une variable string avec une phrase;
+        //Afficher la phrase en majuscules(ToUpper());
+        //Remplacer un mot par un autre(Replace());
+        //Afficher le nombre de caractères(Length);
         Console.WriteLine("|*************************Exercice #3*************************|");
         var str = "Nous sommes dans un cours de C# et de bd!";
         var strUpper = str.ToUpper();
@@ -72,10 +98,24 @@ class Program
         var strReplace = str.Replace("cours", "formation");
         Console.WriteLine($"Len : {strReplace.Length}");
 
+        //Exercice 4 – Classes et objets
+        //Objectif : Créer et utiliser une classe simple.
+        //Énoncé:
+        //Créer une classe Produit avec propriétés Nom et Prix;
+        //Ajouter une méthode Afficher() qui affiche « Nom: Prix $ »;
+        //Dans Main, créer un objet Produit et appeler Afficher().
         Console.WriteLine("|*************************Exercice #4*************************|");
         var produit = new Produit();
         Console.WriteLine(produit.Afficher());
 
+        //Exercice 5 – Encapsulation
+        //Objectif : Protéger les données avec des modificateurs d’accès.
+        //Énoncé :
+        //Créer une classe CompteBancaire avec:
+        //Champ privé solde initialisé à 100;
+        //Méthode publique AfficherSolde();
+        //Méthode publique Deposer(decimal montant) qui ajoute au solde;
+        //Dans Main, créer un compte, déposer 50, afficher le solde.
         Console.WriteLine("|*************************Exercice #5*************************|");
         var compteBanquaire = new CompteBanquaire();
         compteBanquaire.Deposer(50.0m);

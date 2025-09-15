@@ -1,7 +1,22 @@
-﻿public class Program
+﻿using System.Globalization;
+using System.Runtime.ConstrainedExecution;
+using System;
+using static Program;
+using System.Net;
+using System.Reflection.Metadata;
+using System.Xml.Linq;
+
+public class Program
 {
     public static void Main(string[] args)
     {
+        //Exercice 1 : Entrée et sortie en console
+        //Objectif : Créer un programme qui demande à l'utilisateur son nom et son âge, puis affiche un message personnalisé.
+        //Énoncé:
+        //        Demandez à l'utilisateur de saisir son nom.
+        //Demandez à l'utilisateur de saisir son âge.
+        //Affichez un message sous la forme :
+        //"Bonjour [nom], vous avez [âge] ans."
         Console.WriteLine("|*************************Exercice #1*************************|");
         Console.WriteLine("Quel est votre nom?");
         var strNom = Console.ReadLine();
@@ -13,6 +28,14 @@
         }
         Console.WriteLine($"Bonjour {strNom}, vous avez {iAge} ans.");
 
+        //Exercice 2 : Utilisation des commentaires
+        //Objectif : Ajouter des commentaires appropriés dans un programme pour expliquer son fonctionnement.
+        //Énoncé :
+        //Écrivez un programme qui calcule la somme de deux nombres entiers.
+        //Ajoutez des commentaires pour :
+        //Expliquer la déclaration des variables.
+        //Décrire la logique de calcul.
+        //Documenter la méthode utilisée avec des commentaires XML.
         Console.WriteLine("|*************************Exercice #2*************************|");
         //Déclaration de la variable gauche
         var iNombreGauche = 0;
