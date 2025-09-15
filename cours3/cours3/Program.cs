@@ -8,6 +8,7 @@ class Program
 {
     static void Main()
     {
+        Console.WriteLine("|*************************Exercice héritage*************************|");
         // Affiche les options d'animaux disponibles
         Console.WriteLine("1. Chien");
         Console.WriteLine("2. Chat");
@@ -52,6 +53,126 @@ class Program
         Console.WriteLine(animal.Manger());
         Console.WriteLine(animal.Deplacer());
         Console.WriteLine(animal.FaireBruit());
+
+        Console.WriteLine("|*************************Exercice #1*************************|");
+        int[] tab = [1, 2, 3, 4, 5];
+        Console.WriteLine($"Somme : {tab.Sum()}");
+        Console.WriteLine($"Len : {tab.Length}");
+
+        Console.WriteLine("|*************************Exercice #2*************************|");
+        var listePrenoms = new List<string>() { "Jean", "Pierre", "Jacques" };
+        listePrenoms.Add("Michel");
+        listePrenoms.Remove("Jacques");
+        Console.WriteLine($"Count : {listePrenoms.Count}");
+
+        Console.WriteLine("|*************************Exercice #3*************************|");
+        var str = "Nous sommes dans un cours de C# et de bd!";
+        var strUpper = str.ToUpper();
+        Console.WriteLine(strUpper);
+        var strReplace = str.Replace("cours", "formation");
+        Console.WriteLine($"Len : {strReplace.Length}");
+
+        Console.WriteLine("|*************************Exercice #4*************************|");
+        var produit = new Produit();
+        Console.WriteLine(produit.Afficher());
+
+        Console.WriteLine("|*************************Exercice #5*************************|");
+        var compteBanquaire = new CompteBanquaire();
+        compteBanquaire.Deposer(50.0m);
+        Console.WriteLine(compteBanquaire.AfficherSolde());
+    }
+}
+
+/// <summary>
+/// Classe représentant un produit avec un nom et un prix.
+/// </summary>
+public class Produit
+{
+    /// <summary>
+    /// Nom du produit.
+    /// </summary>
+    public string Nom { get; set; }
+
+    /// <summary>
+    /// Prix du produit.
+    /// </summary>
+    public decimal Prix { get; set; }
+
+    /// <summary>
+    /// Constructeur par défaut.
+    /// </summary>
+    public Produit()
+    {
+        Nom = "Produit générique";
+        Prix = 100.0m;
+    }
+    /// <summary>
+    /// Constructeur de base pour initialiser les propriétés du produit.
+    /// </summary>
+    /// <param name="nom"></param>
+    /// <param name="prix"></param>
+    public Produit(string nom, decimal prix)
+    {
+        Nom = nom;
+        Prix = prix;
+    }
+
+    /// <summary>
+    /// Méthode pour afficher les détails du produit.
+    /// </summary>
+    /// <returns></returns>
+    public string Afficher()
+    {
+        return $"Nom: {Nom}, Prix: {Prix}$";
+    }
+}
+
+/// <summary>
+/// Classe représentant un compte bancaire.
+/// </summary>
+public class CompteBanquaire
+{
+    /// <summary>
+    /// Solde du compte bancaire.
+    /// </summary>
+    public decimal Solde { get; private set; }
+
+    /// <summary>
+    /// Constructeur par défaut.
+    /// </summary>
+    public CompteBanquaire()
+    {
+        Solde = 100.0m;
+    }
+
+    /// <summary>
+    /// Constructeur de base pour initialiser les propriétés du compte bancaire.
+    /// </summary>
+    /// <param name="soldeInitial"></param>
+    public CompteBanquaire(decimal soldeInitial)
+    {
+        Solde = soldeInitial;
+    }
+
+    /// <summary>
+    /// Méthode pour déposer un montant sur le compte bancaire.
+    /// </summary>
+    /// <param name="montant"></param>
+    public void Deposer(decimal montant)
+    {
+        if (montant > 0)
+        {
+            Solde += montant;
+        }
+    }
+
+    /// <summary>
+    /// Méthode pour retirer un montant du compte bancaire.
+    /// </summary>
+    /// <returns></returns>
+    public string AfficherSolde()
+    {
+        return $"Solde: {Solde}$";
     }
 }
 
