@@ -5,7 +5,7 @@ namespace cours6
 {
     public partial class frmCours6 : Form
     {
-        private string _strConnectionString = "Server=TOUR-ANTOINE;Database=MaBase;Trusted_Connection=True;TrustServerCertificate=true;";
+        private string _strConnectionString = "Server = {VOTRE_SERVEUR};Database = {VOTRE_BASE}; Trusted_Connection = True; TrustServerCertificate = true; ";
 
         /// <summary>
         /// Constructeur du formulaire
