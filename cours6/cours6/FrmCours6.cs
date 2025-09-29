@@ -1,3 +1,5 @@
+using cours6.Modele;
+using cours6.Repository;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -5,7 +7,9 @@ namespace cours6
 {
     public partial class frmCours6 : Form
     {
-        private string _strConnectionString = "Server = {VOTRE_SERVEUR};Database = {VOTRE_BASE}; Trusted_Connection = True; TrustServerCertificate = true; ";
+        private ClientRepository _clientRepo;
+        private CommandeRepository _commandeRepo;
+        private string _strConnectionString = "Server=TOUR-ANTOINE;Database=MaBase;Trusted_Connection=True;TrustServerCertificate=true;";
 
         /// <summary>
         /// Constructeur du formulaire
@@ -13,6 +17,8 @@ namespace cours6
         public frmCours6()
         {
             InitializeComponent();
+            _clientRepo = new ClientRepository(_strConnectionString);
+            _commandeRepo = new CommandeRepository(_strConnectionString);
             CreerTablesSiNonExistantes();
             RechargerDataGridClient();
         }
@@ -38,27 +44,20 @@ namespace cours6
             {
                 string nom = txtNom.Text;
                 string email = txtEmail.Text;
-                var strInsert = "INSERT INTO Clients (Nom, Email) VALUES (@Nom, @Email)";
-                using (SqlConnection connection = new SqlConnection(_strConnectionString))
+                var client = new Client { Nom = nom, Email = email };
+
+                if (_clientRepo.Inserer(client))
                 {
-                    connection.Open();
-                    SqlCommand command = new SqlCommand(strInsert, connection);
-                    command.Parameters.AddWithValue("@Nom", nom);
-                    command.Parameters.AddWithValue("@Email", email);
-                    int rowsAffected = command.ExecuteNonQuery();
-                    if (rowsAffected > 0)
-                    {
-                        var strMessage = "Client ajouté avec succès";
-                        Console.WriteLine(strMessage);
-                        MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        RechargerDataGridClient();
-                    }
-                    else
-                    {
-                        var strMessage = "Erreur lors de l'ajout du client";
-                        Console.WriteLine(strMessage);
-                        MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    var strMessage = "Client ajouté avec succès";
+                    Console.WriteLine(strMessage);
+                    MessageBox.Show(strMessage, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    RechargerDataGridClient();
+                }
+                else
+                {
+                    var strMessage = "Erreur lors de l'ajout du client";
+                    Console.WriteLine(strMessage);
+                    MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
@@ -85,26 +84,19 @@ namespace cours6
                     MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                var strDelete = "DELETE FROM Clients WHERE Id = @Id";
-                using (SqlConnection connection = new SqlConnection(_strConnectionString))
+
+                if (_clientRepo.Supprimer(id))
                 {
-                    connection.Open();
-                    SqlCommand command = new SqlCommand(strDelete, connection);
-                    command.Parameters.AddWithValue("@Id", id);
-                    int rowsAffected = command.ExecuteNonQuery();
-                    if (rowsAffected > 0)
-                    {
-                        var strMessage = "Client supprimé avec succès";
-                        Console.WriteLine(strMessage);
-                        MessageBox.Show(strMessage, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        RechargerDataGridClient();
-                    }
-                    else
-                    {
-                        var strMessage = "Aucun client trouvé avec cet ID";
-                        Console.WriteLine(strMessage);
-                        MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    var strMessage = "Client supprimé avec succès";
+                    Console.WriteLine(strMessage);
+                    MessageBox.Show(strMessage, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    RechargerDataGridClient();
+                }
+                else
+                {
+                    var strMessage = "Aucun client trouvé avec cet ID";
+                    Console.WriteLine(strMessage);
+                    MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
@@ -133,28 +125,20 @@ namespace cours6
                 }
                 string nom = txtNom.Text;
                 string email = txtEmail.Text;
-                var strUpdate = "UPDATE Clients SET Nom = @Nom, Email = @Email WHERE Id = @Id";
-                using (SqlConnection connection = new SqlConnection(_strConnectionString))
+                var client = new Client { Id = id, Nom = nom, Email = email };
+
+                if (_clientRepo.MaJ(client))
                 {
-                    connection.Open();
-                    SqlCommand command = new SqlCommand(strUpdate, connection);
-                    command.Parameters.AddWithValue("@Id", id);
-                    command.Parameters.AddWithValue("@Nom", nom);
-                    command.Parameters.AddWithValue("@Email", email);
-                    int rowsAffected = command.ExecuteNonQuery();
-                    if (rowsAffected > 0)
-                    {
-                        var strMessage = "Client mis à jour avec succès";
-                        Console.WriteLine(strMessage);
-                        MessageBox.Show(strMessage, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        RechargerDataGridClient();
-                    }
-                    else
-                    {
-                        var strMessage = "Aucun client trouvé avec cet ID";
-                        Console.WriteLine(strMessage);
-                        MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    var strMessage = "Client mis à jour avec succès";
+                    Console.WriteLine(strMessage);
+                    MessageBox.Show(strMessage, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    RechargerDataGridClient();
+                }
+                else
+                {
+                    var strMessage = "Aucun client trouvé avec cet ID";
+                    Console.WriteLine(strMessage);
+                    MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
@@ -176,6 +160,24 @@ namespace cours6
         }
 
         /// <summary>
+        /// Recharger le DataGridView avec les données de la base
+        /// </summary>
+        private void RechargerDataGridClient()
+        {
+            try
+            {
+                dgvClients.DataSource = null;
+                dgvClients.DataSource = _clientRepo.ObtenirTout();
+            }
+            catch (Exception ex)
+            {
+                var strMessage = $"Erreur lors du rechargement du DataGridView : {ex.Message}";
+                Console.WriteLine(strMessage);
+                MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
         /// Afficher les commandes du client sélectionné
         /// </summary>
         /// <param name="sender"></param>
@@ -189,48 +191,7 @@ namespace cours6
                 if (idValue == DBNull.Value)
                     return;
                 int clientId = Convert.ToInt32(idValue);
-                using (SqlConnection connection = new SqlConnection(_strConnectionString))
-                {
-                    connection.Open();
-                    string query = "SELECT * FROM Commandes WHERE ClientId = @ClientId";
-                    using (SqlCommand cmd = new SqlCommand(query, connection))
-                    {
-                        cmd.Parameters.AddWithValue("@ClientId", clientId);
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        DataTable dtCommandes = new DataTable();
-                        adapter.Fill(dtCommandes);
-                        dgvCommandes.DataSource = dtCommandes;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Recharger le DataGridView avec les données de la base
-        /// </summary>
-        private void RechargerDataGridClient()
-        {
-            try
-            {
-                if (dgvClients.DataSource != null)
-                {
-                    dgvClients.DataSource = null;
-                }
-                using (SqlConnection connection = new SqlConnection(_strConnectionString))
-                {
-                    connection.Open();
-                    var strSelect = "SELECT * FROM Clients";
-                    SqlDataAdapter adapter = new SqlDataAdapter(strSelect, connection);
-                    DataSet ds = new DataSet();
-                    adapter.Fill(ds, "Clients");
-                    dgvClients.DataSource = ds.Tables["Clients"];
-                }
-            }
-            catch (Exception ex)
-            {
-                var strMessage = $"Erreur lors du rechargement du DataGridView : {ex.Message}";
-                Console.WriteLine(strMessage);
-                MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                dgvCommandes.DataSource = _commandeRepo.GetCommandesByClient(clientId);
             }
         }
 
@@ -352,34 +313,20 @@ namespace cours6
                     return;
                 }
 
-                using (SqlConnection connection = new SqlConnection(_strConnectionString))
+                DataTable dt = _clientRepo.GetClientsByEmailDomain(domaine);
+
+                if (dt.Rows.Count == 0)
                 {
-                    connection.Open();
-                    string strSelect = "SELECT Id, Nom, Email FROM Clients WHERE Email LIKE @Domaine";
-                    using (SqlCommand command = new SqlCommand(strSelect, connection))
-                    {
-                        command.Parameters.AddWithValue("@Domaine", "%" + domaine);
-
-                        using (SqlDataAdapter adapter = new SqlDataAdapter(command))
-                        {
-                            DataTable dt = new DataTable();
-                            adapter.Fill(dt);
-
-                            if (dt.Rows.Count == 0)
-                            {
-                                var strMessage = "Aucun client trouvé pour ce domaine.";
-                                Console.WriteLine(strMessage);
-                                MessageBox.Show(strMessage, "Résultat", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                dgvClients.DataSource = null;
-                            }
-                            else
-                            {
-                                var strMessage = $"Clients filtrés trouvés: {dt.Rows.Count}";
-                                Console.WriteLine(strMessage);
-                                dgvClients.DataSource = dt;
-                            }
-                        }
-                    }
+                    var strMessage = "Aucun client trouvé pour ce domaine.";
+                    Console.WriteLine(strMessage);
+                    MessageBox.Show(strMessage, "Résultat", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    dgvClients.DataSource = null;
+                }
+                else
+                {
+                    var strMessage = $"Clients filtrés trouvés: {dt.Rows.Count}";
+                    Console.WriteLine(strMessage);
+                    dgvClients.DataSource = dt;
                 }
             }
             catch (Exception ex)
