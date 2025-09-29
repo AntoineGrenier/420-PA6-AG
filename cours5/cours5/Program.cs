@@ -4,8 +4,8 @@ static class Program
 {
     static void Main(string[] args)
     {
-        string connStr = "Server=TOUR-ANTOINE;Database=MaBase;Trusted_Connection=True;TrustServerCertificate=true;";
-        using (SqlConnection con = new SqlConnection(connStr))
+        var strConnectionString = "Server = {VOTRE_SERVEUR};Database = {VOTRE_BASE}; Trusted_Connection = True; TrustServerCertificate = true; ";
+        using (SqlConnection con = new SqlConnection(strConnectionString))
         {
             con.Open();
             Console.WriteLine("Connexion réussie");
@@ -24,7 +24,6 @@ static class Program
         //Créer une base MaBase dans SSMS;
         //Écrire un programme C# qui ouvrir une connexion et afficher "Connexion réussie" si tout fonctionne.
         Console.WriteLine("|*************************Exercice #1*************************|");
-        var strConnectionString = "Server = {VOTRE_SERVEUR};Database = {VOTRE_BASE}; Trusted_Connection = True; TrustServerCertificate = true; ";
         using (SqlConnection connection = new SqlConnection(strConnectionString))
         {
             try
@@ -62,6 +61,27 @@ static class Program
         //Demander à l’utilisateur un nom et un email;
         //Insérer ces données dans la table Clients avec SqlCommand et paramètres.
         Console.WriteLine("|*************************Exercice #3*************************|");
+        Console.Write("Entrez le nom du client: ");
+        string nom = Console.ReadLine();
+        Console.Write("Entrez l'email du client: ");
+        string email = Console.ReadLine();
+        var strInsert = "INSERT INTO Clients (Nom, Email) VALUES (@Nom, @Email)";
+        using (SqlConnection connection = new SqlConnection(strConnectionString))
+        {
+            connection.Open();
+            SqlCommand command = new SqlCommand(strInsert, connection);
+            command.Parameters.AddWithValue("@Nom", nom);
+            command.Parameters.AddWithValue("@Email", email);
+            int rowsAffected = command.ExecuteNonQuery();
+            if (rowsAffected > 0)
+            {
+                Console.WriteLine("Client ajouté avec succès");
+            }
+            else
+            {
+                Console.WriteLine("Erreur lors de l'ajout du client");
+            }
+        }
 
         //Exercice 4 – Mise à jour de données
         //Objectif : Modifier un enregistrement existant.
@@ -70,6 +90,27 @@ static class Program
         //Mettre à jour l’email dans la base;
         //Afficher un message confirmant la modification.
         Console.WriteLine("|*************************Exercice #4*************************|");
+        Console.Write("Entrez l'ID du client à mettre à jour: ");
+        int idToUpdate = int.Parse(Console.ReadLine());
+        Console.Write("Entrez le nouvel email du client: ");
+        string newEmail = Console.ReadLine();
+        var strUpdate = "UPDATE Clients SET Email = @Email WHERE Id = @Id";
+        using (SqlConnection connection = new SqlConnection(strConnectionString))
+        {
+            connection.Open();
+            SqlCommand command = new SqlCommand(strUpdate, connection);
+            command.Parameters.AddWithValue("@Email", newEmail);
+            command.Parameters.AddWithValue("@Id", idToUpdate);
+            int rowsAffected = command.ExecuteNonQuery();
+            if (rowsAffected > 0)
+            {
+                Console.WriteLine("Client mis à jour avec succès");
+            }
+            else
+            {
+                Console.WriteLine("Erreur lors de la mise à jour du client");
+            }
+        }
 
         //Exercice 5 – Suppression de données
         //Objectif : Supprimer un enregistrement.
@@ -78,5 +119,23 @@ static class Program
         //Le supprimer de la table Clients;
         //Afficher "Client supprimé" si la suppression est réussie.
         Console.WriteLine("|*************************Exercice #5*************************|");
+        Console.Write("Entrez l'ID du client à supprimer: ");
+        int idToDelete = int.Parse(Console.ReadLine());
+        var strDelete = "DELETE FROM Clients WHERE Id = @Id";
+        using (SqlConnection connection = new SqlConnection(strConnectionString))
+        {
+            connection.Open();
+            SqlCommand command = new SqlCommand(strDelete, connection);
+            command.Parameters.AddWithValue("@Id", idToDelete);
+            int rowsAffected = command.ExecuteNonQuery();
+            if (rowsAffected > 0)
+            {
+                Console.WriteLine("Client supprimé avec succès");
+            }
+            else
+            {
+                Console.WriteLine("Erreur lors de la suppression du client");
+            }
+        }
     }
 }
