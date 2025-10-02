@@ -1,13 +1,4 @@
-﻿using static System.Collections.Specialized.BitVector32;
-using System.Net.Sockets;
-using System.Runtime.ConstrainedExecution;
-using System.Text;
-using System;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Diagnostics.Metrics;
-using System.Threading.Channels;
-
-static class Program
+﻿static class Program
 {
     static void Main(string[] args)
     {
