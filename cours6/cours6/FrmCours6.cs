@@ -313,7 +313,7 @@ namespace cours6
                     return;
                 }
 
-                DataTable dt = _clientRepo.GetClientsByEmailDomain(domaine);
+                DataTable dt = _clientRepo.ObtenirClientsParDomaine(domaine);
 
                 if (dt.Rows.Count == 0)
                 {
@@ -349,7 +349,32 @@ namespace cours6
         //• Bonne pratique : toujours encapsuler les opérations critiques dans une transaction.
         private void btnExercice2_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Voir l'exercice 2 dans le code source.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                if (!int.TryParse(txtId.Text, out int clientId))
+                {
+                    MessageBox.Show("L'ID du client doit être un nombre entier.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                if (!decimal.TryParse(txtMontantCommande.Text, out decimal montantCommande))
+                {
+                    MessageBox.Show("Le montant de la commande doit être un nombre décimal.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                bool ok = _clientRepo.AjouterCommandeEtMettreAJourSolde(clientId, montantCommande, DateTime.Now);
+
+                if (ok)
+                {
+                    MessageBox.Show("Commande ajoutée et solde client mis à jour avec succès.", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    RechargerDataGridClient();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur : {ex.Message}", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         //Exercice 3 – DataSet et DataAdapter(mode déconnecté)
@@ -363,7 +388,47 @@ namespace cours6
         //• Bonne pratique : valider les données en mémoire avant de les synchroniser.
         private void btnExercice3_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Voir l'exercice 3 dans le code source.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                DataTable dt = _clientRepo.ObtenirTout();
+                DataSet ds = new DataSet();
+                ds.Tables.Add(dt.Copy());
+
+                DataTable clientsTable = ds.Tables[0];
+                if (clientsTable.Rows.Count > 0)
+                {
+                    clientsTable.Rows[0]["Nom"] = clientsTable.Rows[0]["Nom"] + " (modifié)";
+                }
+
+                DataRow newRow = clientsTable.NewRow();
+                newRow["Nom"] = "Nouveau Client";
+                newRow["Email"] = "nouveau@email.com";
+                newRow["Solde"] = 0m;
+                clientsTable.Rows.Add(newRow);
+
+                foreach (DataRow row in clientsTable.Rows)
+                {
+                    if (row.RowState == DataRowState.Added || row.RowState == DataRowState.Modified)
+                    {
+                        if (string.IsNullOrWhiteSpace(row["Nom"].ToString()) ||
+                            string.IsNullOrWhiteSpace(row["Email"].ToString()))
+                        {
+                            MessageBox.Show("Nom et Email ne doivent pas être vides.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                    }
+                }
+
+                _clientRepo.SynchroniserDataSet(ds);
+
+                RechargerDataGridClient();
+
+                MessageBox.Show("Modifications synchronisées avec succès.", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur : {ex.Message}", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         //Exercice 4 – Jointure et affichage(mode déconnecté)
@@ -375,7 +440,47 @@ namespace cours6
         //• Bonne pratique : utiliser les relations dans le DataSet pour éviter de refaire des requêtes multiples.
         private void btnExercice4_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Voir l'exercice 4 dans le code source.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                DataSet ds = new DataSet();
+                DataTable dtClients = _clientRepo.ObtenirTout();
+                DataTable dtCommandes = _commandeRepo.ObtenirTout();
+
+                dtClients.TableName = "Clients";
+                dtCommandes.TableName = "Commandes";
+                ds.Tables.Add(dtClients.Copy());
+                ds.Tables.Add(dtCommandes.Copy());
+
+                ds.Relations.Add(
+                    "ClientCommandes",
+                    ds.Tables["Clients"].Columns["Id"],
+                    ds.Tables["Commandes"].Columns["ClientId"]
+                );
+
+                string result = "";
+                foreach (DataRow clientRow in ds.Tables["Clients"].Rows)
+                {
+                    result += $"Client: {clientRow["Nom"]} ({clientRow["Email"]})\n";
+                    DataRow[] commandes = clientRow.GetChildRows("ClientCommandes");
+                    if (commandes.Length == 0)
+                    {
+                        result += "  - Aucune commande\n";
+                    }
+                    else
+                    {
+                        foreach (DataRow commandeRow in commandes)
+                        {
+                            result += $"  - Commande #{commandeRow["Id"]}: Montant = {commandeRow["Montant"]}, Date = {commandeRow["DateCommande"]}\n";
+                        }
+                    }
+                }
+
+                MessageBox.Show(result, "Liste des commandes par client", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur : {ex.Message}", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

@@ -58,18 +58,72 @@ namespace cours6.Repository
         /// <summary>
         /// Obtenir les clients par domaine email.
         /// </summary>
-        /// <param name="domain"></param>
+        /// <param name="domaine"></param>
         /// <returns></returns>
-        public DataTable GetClientsByEmailDomain(string domain)
+        public DataTable ObtenirClientsParDomaine(string domaine)
         {
             using var connection = new SqlConnection(_connectionString);
             connection.Open();
             var cmd = new SqlCommand("SELECT Id, Nom, Email FROM Clients WHERE Email LIKE @Domaine", connection);
-            cmd.Parameters.AddWithValue("@Domaine", "%" + domain);
+            cmd.Parameters.AddWithValue("@Domaine", "%" + domaine);
             var adapter = new SqlDataAdapter(cmd);
             var dt = new DataTable();
             adapter.Fill(dt);
             return dt;
+        }
+
+        /// <summary>
+        /// Ajouter une commande et mettre à jour le solde du client dans une transaction.
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="montant"></param>
+        /// <param name="dateCommande"></param>
+        /// <returns></returns>
+        public bool AjouterCommandeEtMettreAJourSolde(int clientId, decimal montant, DateTime dateCommande)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                // Insert commande
+                var cmdCommande = new SqlCommand(
+                    "INSERT INTO Commandes (ClientId, Montant, DateCommande) VALUES (@ClientId, @Montant, @DateCommande)",
+                    connection, transaction);
+                cmdCommande.Parameters.AddWithValue("@ClientId", clientId);
+                cmdCommande.Parameters.AddWithValue("@Montant", montant);
+                cmdCommande.Parameters.AddWithValue("@DateCommande", dateCommande);
+                cmdCommande.ExecuteNonQuery();
+
+                // Update solde
+                var cmdSolde = new SqlCommand(
+                    "UPDATE Clients SET Solde = Solde + @Montant WHERE Id = @ClientId",
+                    connection, transaction);
+                cmdSolde.Parameters.AddWithValue("@Montant", montant);
+                cmdSolde.Parameters.AddWithValue("@ClientId", clientId);
+                cmdSolde.ExecuteNonQuery();
+
+                transaction.Commit();
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Synchroniser un DataSet avec la table Clients.
+        /// </summary>
+        /// <param name="ds"></param>
+        public void SynchroniserDataSet(DataSet ds)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            connection.Open();
+            var adapter = new SqlDataAdapter("SELECT * FROM Clients", connection);
+            var builder = new SqlCommandBuilder(adapter);
+            adapter.Update(ds.Tables[0]);
         }
     }
 }
