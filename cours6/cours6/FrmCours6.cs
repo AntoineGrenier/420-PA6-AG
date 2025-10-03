@@ -5,7 +5,7 @@ namespace cours6
 {
     public partial class frmCours6 : Form
     {
-        private string _strConnectionString = "Server = {VOTRE_SERVEUR};Database = {VOTRE_BASE}; Trusted_Connection = True; TrustServerCertificate = true; ";
+        private string _strConnectionString = "Server=TOUR-ANTOINE;Database=MaBase;Trusted_Connection=True;TrustServerCertificate=true;";
 
         /// <summary>
         /// Constructeur du formulaire
@@ -402,7 +402,73 @@ namespace cours6
         //• Bonne pratique : toujours encapsuler les opérations critiques dans une transaction.
         private void btnExercice2_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Voir l'exercice 2 dans le code source.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                if (!int.TryParse(txtId.Text, out int clientId))
+                {
+                    var strMessage = "L'ID du client doit être un nombre entier.";
+                    Console.WriteLine(strMessage);
+                    MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                if (!decimal.TryParse(txtMontantCommande.Text, out decimal montantCommande))
+                {
+                    var strMessage = "Le montant de la commande doit être un nombre décimal.";
+                    Console.WriteLine(strMessage);
+                    MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                using (SqlConnection connection = new SqlConnection(_strConnectionString))
+                {
+                    connection.Open();
+                    using (SqlTransaction transaction = connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            // 1. Ajouter la commande
+                            string insertCommande = "INSERT INTO Commandes (ClientId, Montant, DateCommande) VALUES (@ClientId, @Montant, @DateCommande)";
+                            using (SqlCommand cmdCommande = new SqlCommand(insertCommande, connection, transaction))
+                            {
+                                cmdCommande.Parameters.AddWithValue("@ClientId", clientId);
+                                cmdCommande.Parameters.AddWithValue("@Montant", montantCommande);
+                                cmdCommande.Parameters.AddWithValue("@DateCommande", DateTime.Now);
+                                cmdCommande.ExecuteNonQuery();
+                            }
+
+                            // 2. Mettre à jour le solde du client
+                            string updateSolde = "UPDATE Clients SET Solde = Solde + @Montant WHERE Id = @ClientId";
+                            using (SqlCommand cmdSolde = new SqlCommand(updateSolde, connection, transaction))
+                            {
+                                cmdSolde.Parameters.AddWithValue("@Montant", montantCommande);
+                                cmdSolde.Parameters.AddWithValue("@ClientId", clientId);
+                                cmdSolde.ExecuteNonQuery();
+                            }
+
+                            // 3. Valider la transaction
+                            transaction.Commit();
+                            var strMessage = "Commande ajoutée et solde client mis à jour avec succès.";
+                            Console.WriteLine(strMessage);
+                            MessageBox.Show(strMessage, "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            RechargerDataGridClient();
+                        }
+                        catch (Exception exTrans)
+                        {
+                            transaction.Rollback();
+                            var strMessage = $"Erreur transaction : {exTrans.Message}";
+                            Console.WriteLine(strMessage);
+                            MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                var strMessage = $"Erreur : {ex.Message}";
+                Console.WriteLine(strMessage);
+                MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         //Exercice 3 – DataSet et DataAdapter(mode déconnecté)
@@ -416,7 +482,65 @@ namespace cours6
         //• Bonne pratique : valider les données en mémoire avant de les synchroniser.
         private void btnExercice3_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Voir l'exercice 3 dans le code source.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_strConnectionString))
+                {
+                    connection.Open();
+                    string selectClients = "SELECT * FROM Clients";
+                    SqlDataAdapter adapter = new SqlDataAdapter(selectClients, connection);
+                    SqlCommandBuilder builder = new SqlCommandBuilder(adapter);
+                    DataSet ds = new DataSet();
+                    adapter.Fill(ds, "Clients");
+                    DataTable dt = ds.Tables["Clients"];
+
+                    // Modifier en mémoire le nom du premier client (si présent)
+                    if (dt.Rows.Count > 0)
+                    {
+                        dt.Rows[0]["Nom"] = dt.Rows[0]["Nom"] + " (modifié)";
+                    }
+
+                    // Ajouter un nouveau client dans le DataSet
+                    DataRow newRow = dt.NewRow();
+                    newRow["Nom"] = "Nouveau Client";
+                    newRow["Email"] = "nouveau@email.com";
+                    newRow["Solde"] = 0m;
+                    dt.Rows.Add(newRow);
+
+                    var strMessage = string.Empty;
+                    // Valider les données en mémoire avant synchronisation
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        if (row.RowState == DataRowState.Added || row.RowState == DataRowState.Modified)
+                        {
+                            if (string.IsNullOrWhiteSpace(row["Nom"].ToString()) ||
+                                string.IsNullOrWhiteSpace(row["Email"].ToString()))
+                            {
+                                strMessage = "Nom et Email ne doivent pas être vides.";
+                                Console.WriteLine(strMessage);
+                                MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
+                            }
+                        }
+                    }
+
+                    // Synchroniser les modifications avec la base
+                    adapter.Update(ds, "Clients");
+
+                    // Afficher la liste des clients après mise à jour
+                    RechargerDataGridClient();
+
+                    strMessage = "Modifications synchronisées avec succès.";
+                    Console.WriteLine(strMessage);
+                    MessageBox.Show(strMessage, "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                var strMessage = $"Erreur : {ex.Message}";
+                Console.WriteLine(strMessage);
+                MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         //Exercice 4 – Jointure et affichage(mode déconnecté)
@@ -428,7 +552,57 @@ namespace cours6
         //• Bonne pratique : utiliser les relations dans le DataSet pour éviter de refaire des requêtes multiples.
         private void btnExercice4_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Voir l'exercice 4 dans le code source.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_strConnectionString))
+                {
+                    connection.Open();
+
+                    // Remplir un DataSet avec les tables Clients et Commandes
+                    DataSet ds = new DataSet();
+
+                    SqlDataAdapter adapterClients = new SqlDataAdapter("SELECT * FROM Clients", connection);
+                    adapterClients.Fill(ds, "Clients");
+
+                    SqlDataAdapter adapterCommandes = new SqlDataAdapter("SELECT * FROM Commandes", connection);
+                    adapterCommandes.Fill(ds, "Commandes");
+
+                    // Créer une relation entre les deux tables
+                    ds.Relations.Add(
+                        "ClientCommandes",
+                        ds.Tables["Clients"].Columns["Id"],
+                        ds.Tables["Commandes"].Columns["ClientId"]
+                    );
+
+                    // Afficher pour chaque client la liste de ses commandes (dans la console et MessageBox)
+                    string result = "";
+                    foreach (DataRow clientRow in ds.Tables["Clients"].Rows)
+                    {
+                        result += $"Client: {clientRow["Nom"]} ({clientRow["Email"]})\n";
+                        DataRow[] commandes = clientRow.GetChildRows("ClientCommandes");
+                        if (commandes.Length == 0)
+                        {
+                            result += "  - Aucune commande\n";
+                        }
+                        else
+                        {
+                            foreach (DataRow commandeRow in commandes)
+                            {
+                                result += $"  - Commande #{commandeRow["Id"]}: Montant = {commandeRow["Montant"]}, Date = {commandeRow["DateCommande"]}\n";
+                            }
+                        }
+                    }
+
+                    Console.WriteLine(result);
+                    MessageBox.Show(result, "Liste des commandes par client", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                var strMessage = $"Erreur : {ex.Message}";
+                Console.WriteLine(strMessage);
+                MessageBox.Show(strMessage, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
