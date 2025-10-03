@@ -1,4 +1,7 @@
-﻿static class Program
+﻿using cours7.Entity;
+using cours7.Repository;
+
+static class Program
 {
     static void Main(string[] args)
     {
@@ -12,7 +15,17 @@
         //Instancier quelques objets Client et afficher leurs informations dans la console;
         //Bonne pratique : utiliser une interface pour uniformiser l’accès aux identifiants dans les entités.
         Console.WriteLine("|*************************Exercice #1*************************|");
-
+        // Instanciation et affichage de quelques clients
+        var clients = new List<Client>
+        {
+            new Client { Id = 1, Nom = "CRUSH", Email = "crush@example.com" },
+            new Client { Id = 2, Nom = "CRUD", Email = "crud@example.com" },
+            new Client { Id = 3, Nom = "DURC", Email = "durc@example.com" }
+        };
+        foreach (var client in clients)
+        {
+            Console.WriteLine(client);
+        }
         //Exercice 2 – Repository générique en mémoire
         //Objectif : Implémenter une interface générique pour gérer des entités en mémoire.
         //Énoncé :
@@ -21,7 +34,23 @@
         //Créer une instance Repository<Client> et tester l’ajout, la suppression et l’affichage des clients.
         //Bonne pratique : séparer la logique métier de la gestion des données avec des interfaces génériques.
         Console.WriteLine("|*************************Exercice 2*************************|");
+        var clientRepo = new Repository<Client>();
+        clientRepo.Ajouter(new Client { Id = 4, Nom = "CRUSH", Email = "crush@example.com" });
+        clientRepo.Ajouter(new Client { Id = 5, Nom = "CRUD", Email = "crud@example.com" });
 
+        Console.WriteLine("Clients après ajout :");
+        foreach (var client in clientRepo.ObtenirTout())
+        {
+            Console.WriteLine(client);
+        }
+
+        clientRepo.Supprimer(4);
+
+        Console.WriteLine("Clients après suppression :");
+        foreach (var client in clientRepo.ObtenirTout())
+        {
+            Console.WriteLine(client);
+        }
         //Exercice 3 – Tri avec IComparable et IComparer
         //Objectif : Implémenter des interfaces de comparaison pour trier des entités.
         //Énoncé :
