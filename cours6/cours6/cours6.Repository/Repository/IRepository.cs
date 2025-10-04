@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace cours6.Repository
+namespace cours6.Repository.Repository
 {
     /// <summary>
     /// Interface générique pour les opérations CRUD

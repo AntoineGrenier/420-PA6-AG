@@ -1,8 +1,8 @@
-﻿using cours6.Modele;
+﻿using cours6.Repository.Modele;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
-namespace cours6.Repository
+namespace cours6.Repository.Repository
 {
     /// <summary>
     /// Repository pour gérer les opérations CRUD sur les clients.
@@ -60,7 +60,7 @@ namespace cours6.Repository
         /// </summary>
         /// <param name="domaine"></param>
         /// <returns></returns>
-        public DataTable ObtenirClientsParDomaine(string domaine)
+        public virtual DataTable ObtenirClientsParDomaine(string domaine)
         {
             using var connection = new SqlConnection(_connectionString);
             connection.Open();
@@ -79,7 +79,7 @@ namespace cours6.Repository
         /// <param name="montant"></param>
         /// <param name="dateCommande"></param>
         /// <returns></returns>
-        public bool AjouterCommandeEtMettreAJourSolde(int clientId, decimal montant, DateTime dateCommande)
+        public virtual bool AjouterCommandeEtMettreAJourSolde(int clientId, decimal montant, DateTime dateCommande)
         {
             using var connection = new SqlConnection(_connectionString);
             connection.Open();
@@ -117,7 +117,7 @@ namespace cours6.Repository
         /// Synchroniser un DataSet avec la table Clients.
         /// </summary>
         /// <param name="ds"></param>
-        public void SynchroniserDataSet(DataSet ds)
+        public virtual void SynchroniserDataSet(DataSet ds)
         {
             using var connection = new SqlConnection(_connectionString);
             connection.Open();

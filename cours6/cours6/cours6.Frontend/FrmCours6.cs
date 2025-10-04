@@ -1,5 +1,5 @@
-using cours6.Modele;
-using cours6.Repository;
+using cours6.Repository.Modele;
+using cours6.Repository.Repository;
 using Microsoft.Data.SqlClient;
 using System.Data;
 

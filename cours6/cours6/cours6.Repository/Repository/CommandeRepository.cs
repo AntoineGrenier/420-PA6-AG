@@ -1,8 +1,8 @@
-﻿using cours6.Modele;
+﻿using cours6.Repository.Modele;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
-namespace cours6.Repository
+namespace cours6.Repository.Repository
 {
     /// <summary>
     /// Repository pour gérer les opérations CRUD sur les commandes.
@@ -62,7 +62,7 @@ namespace cours6.Repository
         /// </summary>
         /// <param name="clientId"></param>
         /// <returns></returns>
-        public DataTable GetCommandesByClient(int clientId)
+        public virtual DataTable GetCommandesByClient(int clientId)
         {
             using var connection = new SqlConnection(_connectionString);
             connection.Open();

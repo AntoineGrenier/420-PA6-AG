@@ -1,4 +1,4 @@
-﻿namespace cours6.Modele
+﻿namespace cours6.Repository.Modele
 {
     /// <summary>
     /// Modèle représentant un client.
