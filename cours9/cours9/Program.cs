@@ -56,6 +56,12 @@ internal class Program
         //Dans ClientService, ajouter une méthode ListClients() qui appelle le repository;
         //Afficher la liste des clients dans la console.
         //Bonne pratique : utiliser le pattern Repository pour isoler l’accès aux données.
+        Console.WriteLine("|*************************Exercice #3*************************|");
+        var clients = clientService.ListClients();
+        foreach(Client client in clients)
+        {
+            Console.WriteLine(clientService.GetClientInfo(client));
+        }
 
         //Exercice 4 – Architecture 3 couches complète
         //Objectif: Mettre en place les 3 couches(Présentation, Logique, Données).
@@ -64,6 +70,7 @@ internal class Program
         //Couche Logique : ClientService avec règles métiers(ex.refuser un client sans email).
         //Couche Présentation : programme console qui demande à l’utilisateur de saisir un client, puis l’ajoute via ClientService.
         //Bonne pratique : chaque couche doit avoir une responsabilité unique et ne pas dépendre directement des autres.
+        Console.WriteLine("|*************************Exercice #4*************************|");
 
         //Exercice 5 – Passage au multicouches(simulation distribuée)
         //Objectif: Simuler une architecture multicouches avec appels séparés.
@@ -73,6 +80,7 @@ internal class Program
         //La couche Logique = contrôleur + service qui valide les règles métiers;
         //La couche Données = repository connecté à une base SQLite ou en mémoire.
         //Bonne pratique : séparer physiquement les couches(client ↔ API ↔ DB) pour illustrer la scalabilité et la sécurité.
+        Console.WriteLine("|*************************Exercice #5*************************|");
 
 
     }
