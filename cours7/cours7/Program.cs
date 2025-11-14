@@ -1,4 +1,8 @@
-﻿static class Program
+﻿using cours7.Entity;
+using cours7.Liste;
+using cours7.Repository;
+
+static class Program
 {
     static void Main(string[] args)
     {
@@ -12,6 +16,17 @@
         //Instancier quelques objets Client et afficher leurs informations dans la console;
         //Bonne pratique : utiliser une interface pour uniformiser l’accès aux identifiants dans les entités.
         Console.WriteLine("|*************************Exercice #1*************************|");
+        // Instanciation et affichage de quelques clients
+        var clients = new List<Client>
+        {
+            new Client { Id = 1, Nom = "CRUSH", Email = "crush@example.com" },
+            new Client { Id = 2, Nom = "CRUD", Email = "crud@example.com" },
+            new Client { Id = 3, Nom = "DURC", Email = "durc@example.com" }
+        };
+        foreach (var client in clients)
+        {
+            Console.WriteLine(client);
+        }
 
         //Exercice 2 – Repository générique en mémoire
         //Objectif : Implémenter une interface générique pour gérer des entités en mémoire.
@@ -21,6 +36,23 @@
         //Créer une instance Repository<Client> et tester l’ajout, la suppression et l’affichage des clients.
         //Bonne pratique : séparer la logique métier de la gestion des données avec des interfaces génériques.
         Console.WriteLine("|*************************Exercice 2*************************|");
+        var clientRepo = new Repository<Client>();
+        clientRepo.Ajouter(new Client { Id = 4, Nom = "CRUSH", Email = "crush@example.com" });
+        clientRepo.Ajouter(new Client { Id = 5, Nom = "CRUD", Email = "crud@example.com" });
+
+        Console.WriteLine("Clients après ajout :");
+        foreach (var client in clientRepo.ObtenirTout())
+        {
+            Console.WriteLine(client);
+        }
+
+        clientRepo.Supprimer(4);
+
+        Console.WriteLine("Clients après suppression :");
+        foreach (var client in clientRepo.ObtenirTout())
+        {
+            Console.WriteLine(client);
+        }
 
         //Exercice 3 – Tri avec IComparable et IComparer
         //Objectif : Implémenter des interfaces de comparaison pour trier des entités.
@@ -30,6 +62,28 @@
         //Créer une liste de clients et la trier selon les deux critères.
         //Bonne pratique : utiliser IComparable pour l’ordre naturel et IComparer pour les tris personnalisés.
         Console.WriteLine("|*************************Exercice #3*************************|");
+        var clientsTri = new List<Client>
+        {
+            new Client { Id = 1, Nom = "CRUSH", Email = "crush@example.com", DateInscription = new DateTime(2024, 5, 1) },
+            new Client { Id = 2, Nom = "CRUD", Email = "crud@example.com", DateInscription = new DateTime(2024, 4, 15) },
+            new Client { Id = 3, Nom = "DURC", Email = "durc@example.com", DateInscription = new DateTime(2023, 6, 10) }
+        };
+
+        // Tri par Nom (IComparable)
+        clientsTri.Sort();
+        Console.WriteLine("Clients triés par Nom :");
+        foreach (var client in clientsTri)
+        {
+            Console.WriteLine(client);
+        }
+
+        // Tri par DateInscription (IComparer)
+        clientsTri.Sort(new ClientParDate());
+        Console.WriteLine("Clients triés par Date d'inscription :");
+        foreach (var client in clientsTri)
+        {
+            Console.WriteLine(client);
+        }
 
         //Exercice 4 – Classe générique avec itérateurs
         //Objectif: Implémenter une structure de données personnalisée avec itération.
@@ -40,6 +94,16 @@
         //Tester la classe avec des objets Commande.
         //Bonne pratique : utiliser yield return pour simplifier l’implémentation des itérateurs.
         Console.WriteLine("|*************************Exercice #4*************************|");
+        var commandes = new Chaine<Commande>();
+        commandes.Ajouter(new Commande { Id = 1, Description = "Ordinateur portable" });
+        commandes.Ajouter(new Commande { Id = 2, Description = "Souris sans fil" });
+        commandes.Ajouter(new Commande { Id = 3, Description = "Clavier mécanique" });
+
+        Console.WriteLine("Liste des commandes dans la chaîne :");
+        foreach (var commande in commandes)
+        {
+            Console.WriteLine(commande);
+        }
 
         //Exercice 5 – Repository DB +structure de données
         //Objectif: Combiner accès DB, structure de données et tri personnalisé.
@@ -51,5 +115,19 @@
         //Afficher un rapport des commandes triées.
         //Bonne pratique : utiliser SqlParameter pour sécuriser les requêtes et structurer les données selon leur usage métier.
         Console.WriteLine("|*************************Exercice #5*************************|");
+        var commandeRepo = new CommandeRepository(strConnectionString);
+        commandeRepo.ChargerCommandes();
+
+        Console.WriteLine("Commandes triées par montant :");
+        foreach (var commande in commandeRepo.ObtenirCommandesTrieesParMontant())
+        {
+            Console.WriteLine(commande);
+        }
+
+        Console.WriteLine("Historique des requêtes SQL :");
+        foreach (var req in commandeRepo.HistoriqueRequetes)
+        {
+            Console.WriteLine(req);
+        }
     }
 }
