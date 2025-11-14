@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using cours9.Modeles;
+using System.Text.Json.Serialization;
 
 namespace cours9.Modele.Entity
 {

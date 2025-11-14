@@ -11,8 +11,4 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\cours9.Modele\cours9.Modele.csproj" />
-  </ItemGroup>
-
 </Project>
