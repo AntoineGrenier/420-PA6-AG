@@ -1,4 +1,4 @@
-﻿namespace cours9.Entity
+﻿namespace cours9.Modele.Entity
 {
     internal interface IEntity
     {

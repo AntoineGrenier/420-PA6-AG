@@ -1,20 +1,10 @@
-﻿using cours9.Entity;
-using cours9.Service;
-using System;
-using System.Data.SqlTypes;
-using System.Diagnostics.Metrics;
-using System.Net;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Channels;
-using System.Xml;
+﻿using cours9.Modele.Entity;
+using cours9.Presentation.Service;
 
 internal class Program
 {
-    private static void Main(string[] args)
+    private static async Task Main(string[] args)
     {
-
         //Exercice 1 – Interface de base pour entité
         //Objectif: Définir une interface simple pour représenter une entité avec un identifiant.
         //Énoncé :
@@ -30,9 +20,9 @@ internal class Program
             new Client { Id = 3, Email = "email3@email.com", Nom = "Nom3" }
         };
 
-        foreach (var client in listeClients)
+        foreach (var clientObj in listeClients)
         {
-            Console.WriteLine($"Id = {client.Id}, Nom = {client.Nom}, Email = {client.Email}");
+            Console.WriteLine($"Id = {clientObj.Id}, Nom = {clientObj.Nom}, Email = {clientObj.Email}");
         }
 
         //Exercice 2 – Séparation Présentation / Logique
@@ -43,9 +33,9 @@ internal class Program
         //Bonne pratique : la logique de formatage et de validation doit être centralisée dans la couche métier, pas dans l’UI.
         Console.WriteLine("|*************************Exercice #2*************************|");
         var clientService = new ClientService();
-        foreach(var client in listeClients)
+        foreach (var clientObj in listeClients)
         {
-            Console.WriteLine(clientService.GetClientInfo(client));
+            Console.WriteLine(clientService.GetClientInfo(clientObj));
         }
 
         //Exercice 3 – Couche Données avec Repository
@@ -58,9 +48,9 @@ internal class Program
         //Bonne pratique : utiliser le pattern Repository pour isoler l’accès aux données.
         Console.WriteLine("|*************************Exercice #3*************************|");
         var clients = clientService.ListClients();
-        foreach(Client client in clients)
+        foreach (var clientObj in clients)
         {
-            Console.WriteLine(clientService.GetClientInfo(client));
+            Console.WriteLine(clientService.GetClientInfo(clientObj));
         }
 
         //Exercice 4 – Architecture 3 couches complète
@@ -71,6 +61,28 @@ internal class Program
         //Couche Présentation : programme console qui demande à l’utilisateur de saisir un client, puis l’ajoute via ClientService.
         //Bonne pratique : chaque couche doit avoir une responsabilité unique et ne pas dépendre directement des autres.
         Console.WriteLine("|*************************Exercice #4*************************|");
+        Console.WriteLine("Nom client");
+        var strNom = Console.ReadLine();
+        Console.WriteLine("Email client");
+        var strEmail = Console.ReadLine();
+        var client = new Client { Email = strEmail, Nom = strNom };
+        try
+        {
+            clientService.AddClient(client);
+            clients = clientService.ListClients();
+            foreach (var clientObj in clients)
+            {
+                Console.WriteLine(clientService.GetClientInfo(clientObj));
+            }
+
+            var clientById = clientService.GetClientById(3);
+            Console.WriteLine(clientService.GetClientInfo(clientById));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+
 
         //Exercice 5 – Passage au multicouches(simulation distribuée)
         //Objectif: Simuler une architecture multicouches avec appels séparés.
@@ -81,7 +93,6 @@ internal class Program
         //La couche Données = repository connecté à une base SQLite ou en mémoire.
         //Bonne pratique : séparer physiquement les couches(client ↔ API ↔ DB) pour illustrer la scalabilité et la sécurité.
         Console.WriteLine("|*************************Exercice #5*************************|");
-
-
+        //À faire
     }
 }

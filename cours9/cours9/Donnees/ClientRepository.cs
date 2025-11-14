@@ -1,6 +1,6 @@
-﻿using cours9.Entity;
+﻿using cours9.Modele.Entity;
 
-namespace cours9.Donnees
+namespace cours9.Presentation.Donnees
 {
     public class ClientRepository
     {
@@ -16,9 +16,19 @@ namespace cours9.Donnees
             };
         }
 
-        public IEnumerable<Client> GetAllClients()
+        public IList<Client> GetAllClients()
         {
             return _clients;
+        }
+
+        public void AddClient(Client client)
+        {
+            _clients.Add(client);
+        }
+
+        public Client GetClientById(int id)
+        {
+            return _clients.FirstOrDefault(c => c.Id == id);
         }
     }
 }
